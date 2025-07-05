@@ -450,7 +450,7 @@ section { padding: 6rem 0; }
 
 @media (max-width: 768px) {
     .navbar-links-desktop,
-    .nav-donate-btn {
+    .navbar .nav-donate-btn { /* <<< THE FIX IS HERE */
         display: none;
     }
     .hamburger-menu {
