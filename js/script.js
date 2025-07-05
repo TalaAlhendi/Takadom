@@ -1,13 +1,27 @@
 document.addEventListener('DOMContentLoaded', function() {
 
-    // --- SCRIPT INITIALIZATION FOR HEADER ---
-    // This function sets up the hamburger menu and highlights the active nav link.
+    // --- DYNAMIC COMPONENT LOADING ---
+    const loadComponent = (selector, url) => {
+        const element = document.querySelector(selector);
+        if (element) {
+            fetch(url)
+                .then(response => response.ok ? response.text() : Promise.reject('Component not found.'))
+                .then(data => {
+                    element.innerHTML = data;
+                    // Re-run scripts that depend on the new content, like the hamburger menu
+                    initializeHeaderScripts();
+                })
+                .catch(error => console.error(`Error loading component ${url}:`, error));
+        }
+    };
+
+    // --- SCRIPTS TO RUN AFTER HEADER LOADS ---
     const initializeHeaderScripts = () => {
         const hamburger = document.querySelector('.hamburger-menu');
         const navMenu = document.querySelector('.navbar-menu');
         const body = document.body;
 
-        if (hamburger && navMenu) {
+        if (hamburger) {
             hamburger.addEventListener('click', () => {
                 hamburger.classList.toggle('active');
                 navMenu.classList.toggle('active');
@@ -27,41 +41,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     };
-    
-    // --- SCRIPT INITIALIZATION FOR FOOTER ---
-    // This function sets up the form submission listeners within the footer.
-    const initializeFooterScripts = () => {
-        const newsletterForm = document.getElementById('newsletter-form');
-        if (newsletterForm) {
-            newsletterForm.addEventListener('submit', (e) => handleFormSubmit(e, 'http://localhost:3000/api/subscribe'));
-        }
-    };
 
-    // --- DYNAMIC COMPONENT LOADING ---
-    // This function fetches and injects component HTML, then runs a callback function.
-    const loadComponent = (selector, url, callback) => {
-        const element = document.querySelector(selector);
-        if (element) {
-            fetch(url)
-                .then(response => {
-                    if (!response.ok) throw new Error(`Component not found: ${url}`);
-                    return response.text();
-                })
-                .then(data => {
-                    element.innerHTML = data;
-                    if (callback) {
-                        callback(); // Run the specific scripts for the loaded component.
-                    }
-                })
-                .catch(error => console.error(`Error loading component ${url}:`, error));
-        }
-    };
-
-    // --- EDITED SCRIPT LOADING ---
-    // Initialize header scripts directly since the header is now static.
-    initializeHeaderScripts();
-    // Continue to load the footer dynamically.
-    loadComponent('footer.main-footer', 'footer.html', initializeFooterScripts);
+    // Load header and footer
+    loadComponent('header.main-header', 'header.html');
+    loadComponent('footer.main-footer', 'footer.html');
 
 
     // --- SCROLL-TRIGGERED FADE-IN ANIMATIONS ---
@@ -77,7 +60,7 @@ document.addEventListener('DOMContentLoaded', function() {
         scrollObserver.observe(el);
     });
 
-    // --- ANIMATED NUMBER COUNTERS WITH PROGRESS CIRCLE ---
+    // --- START: ANIMATED NUMBER COUNTERS WITH PROGRESS CIRCLE ---
     const statsSection = document.querySelector('.impact-stats');
     if (statsSection) {
         const statsObserver = new IntersectionObserver((entries, observer) => {
@@ -91,46 +74,66 @@ document.addEventListener('DOMContentLoaded', function() {
                     const circumference = 2 * Math.PI * radius;
                     const target = +numberEl.getAttribute('data-target');
                     
+                    // This sets the circle to be initially empty
                     progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
                     progressCircle.style.strokeDashoffset = circumference;
 
                     let startTime = null;
-                    const animationDuration = 2500;
+                    const animationDuration = 2500; // Animation duration in milliseconds
 
                     function animate(currentTime) {
                         if (startTime === null) startTime = currentTime;
                         const elapsedTime = currentTime - startTime;
                         const progress = Math.min(elapsedTime / animationDuration, 1);
                         
-                        numberEl.innerText = Math.floor(progress * target).toLocaleString();
+                        // Update number
+                        const currentNumber = Math.floor(progress * target);
+                        numberEl.innerText = currentNumber.toLocaleString();
                         
+                        // Update circle offset
                         const offset = circumference - progress * circumference;
                         progressCircle.style.strokeDashoffset = offset;
 
                         if (progress < 1) {
                             requestAnimationFrame(animate);
                         } else {
+                            // Ensure final values are exact
                             numberEl.innerText = target.toLocaleString();
                             progressCircle.style.strokeDashoffset = 0;
                         }
                     }
+
                     requestAnimationFrame(animate);
                 });
-                observer.unobserve(statsSection);
+
+                observer.unobserve(statsSection); // Animate only once
             }
         }, { threshold: 0.6 });
+
         statsObserver.observe(statsSection);
     }
+    // --- END: ANIMATED NUMBER COUNTERS WITH PROGRESS CIRCLE ---
 
-    // --- ASYNCHRONOUS FORM SUBMISSION HANDLER ---
+    // --- ASYNCHRONOUS FORM SUBMISSION ---
+    setTimeout(() => {
+        const newsletterForm = document.getElementById('newsletter-form');
+        if (newsletterForm) {
+            newsletterForm.addEventListener('submit', (e) => handleFormSubmit(e, 'http://localhost:3000/api/subscribe'));
+        }
+    }, 500);
+
+    const contactForm = document.getElementById('contact-form');
+    if (contactForm) {
+        contactForm.addEventListener('submit', (e) => handleFormSubmit(e, 'http://localhost:3000/api/contact'));
+    }
+
     const handleFormSubmit = async (event, endpoint) => {
         event.preventDefault();
         const form = event.target;
-        // More robustly find the status element using a data attribute or specific ID
-        const statusElement = document.querySelector(`[data-form-status-for="${form.id}"]`);
+        const statusElement = form.nextElementSibling;
 
-        if (!statusElement) {
-            console.error('Form status element not found for form:', form.id);
+        if (!statusElement || !(statusElement.id.includes('form-status'))) {
+            console.error('Form status element not found immediately after the form.');
             return;
         }
 
@@ -148,7 +151,10 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             const result = await response.json();
-            if (!response.ok) throw new Error(result.message || 'An unexpected error occurred.');
+
+            if (!response.ok) {
+                throw new Error(result.message || 'An unexpected error occurred.');
+            }
 
             statusElement.className = 'success';
             statusElement.textContent = result.message;
@@ -156,16 +162,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
         } catch (error) {
             statusElement.className = 'error';
-            statusElement.textContent = error.message || 'Unable to connect to the server.';
+            statusElement.textContent = error.message || 'Unable to connect to the server. Please try again.';
         } finally {
             setTimeout(() => {
-                if (statusElement) statusElement.style.display = 'none';
+                if (statusElement) {
+                    statusElement.style.display = 'none';
+                }
             }, 6000);
         }
     };
-    // Set up contact form listener immediately (as it's not in a loaded component)
-    const contactForm = document.getElementById('contact-form');
-    if (contactForm) {
-        contactForm.addEventListener('submit', (e) => handleFormSubmit(e, 'http://localhost:3000/api/contact'));
-    }
 });
