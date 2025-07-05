@@ -57,8 +57,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     };
 
-    // Load header and footer and initialize their specific scripts
-    loadComponent('header.main-header', 'header.html', initializeHeaderScripts);
+    // --- EDITED SCRIPT LOADING ---
+    // Initialize header scripts directly since the header is now static.
+    initializeHeaderScripts();
+    // Continue to load the footer dynamically.
     loadComponent('footer.main-footer', 'footer.html', initializeFooterScripts);
 
 
@@ -161,7 +163,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }, 6000);
         }
     };
-    
     // Set up contact form listener immediately (as it's not in a loaded component)
     const contactForm = document.getElementById('contact-form');
     if (contactForm) {
