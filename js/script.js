@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(response => response.ok ? response.text() : Promise.reject('Component not found.'))
                 .then(data => {
                     element.innerHTML = data;
-                    // Run any callback function after the component is loaded
                     if (callback) {
                         callback();
                     }
@@ -22,9 +21,11 @@ document.addEventListener('DOMContentLoaded', function() {
         const hamburger = document.querySelector('.hamburger-menu');
         const navMenu = document.querySelector('.navbar-menu');
         const overlay = document.querySelector('.mobile-menu-overlay');
+        const closeBtn = document.querySelector('.close-menu-btn'); // Find the close button
         const body = document.body;
 
-        if (hamburger && navMenu && overlay) {
+        // Ensure all menu elements exist before adding listeners
+        if (hamburger && navMenu && overlay && closeBtn) { 
             const openMenu = () => {
                 hamburger.classList.add('active');
                 navMenu.classList.add('active');
@@ -49,6 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
 
             overlay.addEventListener('click', closeMenu);
+            closeBtn.addEventListener('click', closeMenu); // <<< FIX IS HERE: Make the close button work
         }
     };
     
