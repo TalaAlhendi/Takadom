@@ -1,16 +1,17 @@
 document.addEventListener('DOMContentLoaded', function() {
 
     // --- SCRIPT INITIALIZATION FOR HEADER ---
+    // This function sets up the hamburger menu and highlights the active nav link.
     const initializeHeaderScripts = () => {
         const hamburger = document.querySelector('.hamburger-menu');
         const navMenu = document.querySelector('.navbar-menu');
-        const overlay = document.querySelector('.mobile-menu-overlay'); // Select the new overlay
+        const body = document.body;
 
-        if (hamburger && navMenu && overlay) {
+        if (hamburger && navMenu) {
             hamburger.addEventListener('click', () => {
                 hamburger.classList.toggle('active');
                 navMenu.classList.toggle('active');
-                overlay.classList.toggle('active'); // Toggle the overlay's active class
+                body.classList.toggle('mobile-menu-open');
             });
         }
 
@@ -28,6 +29,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
     
     // --- SCRIPT INITIALIZATION FOR FOOTER ---
+    // This function sets up the form submission listeners within the footer.
     const initializeFooterScripts = () => {
         const newsletterForm = document.getElementById('newsletter-form');
         if (newsletterForm) {
@@ -36,6 +38,7 @@ document.addEventListener('DOMContentLoaded', function() {
     };
 
     // --- DYNAMIC COMPONENT LOADING ---
+    // This function fetches and injects component HTML, then runs a callback function.
     const loadComponent = (selector, url, callback) => {
         const element = document.querySelector(selector);
         if (element) {
@@ -47,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 .then(data => {
                     element.innerHTML = data;
                     if (callback) {
-                        callback();
+                        callback(); // Run the specific scripts for the loaded component.
                     }
                 })
                 .catch(error => console.error(`Error loading component ${url}:`, error));
@@ -72,33 +75,51 @@ document.addEventListener('DOMContentLoaded', function() {
         scrollObserver.observe(el);
     });
 
-    // --- ANIMATED NUMBER COUNTERS ---
+    // --- ANIMATED NUMBER COUNTERS WITH PROGRESS CIRCLE ---
     const statsSection = document.querySelector('.impact-stats');
     if (statsSection) {
         const statsObserver = new IntersectionObserver((entries, observer) => {
             if (entries[0].isIntersecting) {
-                const counters = entries[0].target.querySelectorAll('.impact-number');
-                counters.forEach(counter => {
-                    const target = +counter.getAttribute('data-target');
-                    let current = 0;
-                    const increment = () => {
-                        const step = target / 100; // Control animation speed
-                        if (current < target) {
-                            current += step;
-                            counter.innerText = Math.ceil(current).toLocaleString();
-                            requestAnimationFrame(increment);
+                const counters = entries[0].target.querySelectorAll('.impact-card');
+
+                counters.forEach(card => {
+                    const numberEl = card.querySelector('.impact-number');
+                    const progressCircle = card.querySelector('.progress-ring__circle');
+                    const radius = progressCircle.r.baseVal.value;
+                    const circumference = 2 * Math.PI * radius;
+                    const target = +numberEl.getAttribute('data-target');
+                    
+                    progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
+                    progressCircle.style.strokeDashoffset = circumference;
+
+                    let startTime = null;
+                    const animationDuration = 2500;
+
+                    function animate(currentTime) {
+                        if (startTime === null) startTime = currentTime;
+                        const elapsedTime = currentTime - startTime;
+                        const progress = Math.min(elapsedTime / animationDuration, 1);
+                        
+                        numberEl.innerText = Math.floor(progress * target).toLocaleString();
+                        
+                        const offset = circumference - progress * circumference;
+                        progressCircle.style.strokeDashoffset = offset;
+
+                        if (progress < 1) {
+                            requestAnimationFrame(animate);
                         } else {
-                            counter.innerText = target.toLocaleString();
+                            numberEl.innerText = target.toLocaleString();
+                            progressCircle.style.strokeDashoffset = 0;
                         }
-                    };
-                    increment();
+                    }
+                    requestAnimationFrame(animate);
                 });
                 observer.unobserve(statsSection);
             }
-        }, { threshold: 0.8 });
+        }, { threshold: 0.6 });
         statsObserver.observe(statsSection);
     }
-    
+
     // --- ASYNCHRONOUS FORM SUBMISSION HANDLER ---
     const handleFormSubmit = async (event, endpoint) => {
         event.preventDefault();
