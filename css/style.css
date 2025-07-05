@@ -5,7 +5,7 @@
 :root {
     --primary-color: #0A2540; /* Deep Blue */
     --secondary-color: #007BFF; /* Bright Blue */
-    --accent-color: #800020; /* Grayish Blue */
+    --accent-color: #800020; /* Burgundy */
     --light-gray: #F6F9FC;
     --text-color: #333;
     --heading-font: 'Manrope', sans-serif;
@@ -22,8 +22,8 @@ body {
     background-color: #FFFFFF;
 }
 
-body.mobile-menu-open::before {
-    content: '';
+/* START: NEW OVERLAY STYLE */
+.mobile-menu-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -31,7 +31,15 @@ body.mobile-menu-open::before {
     height: 100%;
     background-color: rgba(0, 0, 0, 0.5);
     z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
 }
+.mobile-menu-overlay.active {
+    opacity: 1;
+    visibility: visible;
+}
+/* END: NEW OVERLAY STYLE */
 
 .container {
     max-width: 1200px;
@@ -69,7 +77,7 @@ section { padding: 6rem 0; }
 }
 .text-content a{
     color: var(--accent-color);
-            }
+}
 .btn-primary { background-color: var(--accent-color); color: #fff; }
 .btn-primary:hover { background-color: #0A2540; color: #fff; transform: translateY(-2px); }
 .btn-secondary { background-color: transparent; color: #fff; border-color: #fff; }
@@ -245,30 +253,28 @@ section { padding: 6rem 0; }
 .inner-text-container p { max-width: 80ch; margin-left: auto; margin-right: auto; margin-bottom: 2.5rem; }
 .inner-text-container p:last-of-type { margin-bottom: 0; }
 
-/* START: MODIFIED CTA SECTION */
 .cta-section {
     background-image: url('../images/contact.png');
     background-size: cover;
     background-position: center;
     position: relative;
-    padding: 0; /* Remove default padding to allow container to control spacing */
+    padding: 4rem 0;
 }
 .cta-section::before {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(0,0,0,0.5); /* Black overlay for readability */
+    background-color: rgba(0,0,0,0.4);
     z-index: 1;
 }
 .cta-section .container {
-    background-color: rgba(0, 0, 0, 0.5);
+    background-color: rgba(157, 176, 185, 0.8);
     color: #fff;
     text-align: center;
     padding: 4rem 2rem;
-    border-radius: 0; /* Make it a full-width banner inside the section */
+    border-radius: var(--border-radius);
     position: relative;
     z-index: 2;
-    max-width: none; /* Allow it to be full-width */
 }
 .cta-section h2, .cta-section p {
     color: #fff;
@@ -278,9 +284,8 @@ section { padding: 6rem 0; }
 }
 .cta-section .btn-secondary-light {
     background-color: #fff;
-    color: var(--primary-color); /* Change text color for contrast */
+    color: var(--primary-color);
 }
-/* END: MODIFIED CTA SECTION */
 
 .team-section { background-color: var(--light-gray); }
 .team-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 2rem; margin-top: 3rem; }
@@ -311,7 +316,7 @@ section { padding: 6rem 0; }
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0; bottom: 0;
-    background-color: rgba(10, 37, 64, 0.9); /* 90% opaque dark blue overlay */
+    background-color: rgba(10, 37, 64, 0.9);
     z-index: 0;
 }
 .impact-stats .container {
@@ -342,11 +347,11 @@ section { padding: 6rem 0; }
 .main-footer {
     background-image: url('../images/palestinian_pattern.svg');
     color: #fff;
-    padding: 0; /* Remove padding from the main tag */
+    padding: 0;
     position: relative;
 }
 .footer-content-wrapper {
-    background-color: rgba(10, 37, 64, 0.95); /* 95% opaque dark blue */
+    background-color: rgba(10, 37, 64, 0.95);
     padding: 4rem 0 2rem;
     position: relative;
     z-index: 1;
@@ -402,6 +407,7 @@ section { padding: 6rem 0; }
     .footer-grid { grid-template-columns: 1fr; }
     .pattern-background-box { padding: 1.5rem; }
     .inner-text-container { padding: 1.5rem; }
+    .cta-section .container { padding: 3rem 1.5rem; }
 }
 
 /* --- SVG Logo Styling --- */
