@@ -1,37 +1,62 @@
 document.addEventListener('DOMContentLoaded', function() {
 
-    // --- DYNAMIC COMPONENT LOADING ---
-    const loadComponent = (selector, url) => {
+    // --- DYNAMIC COMPONENT LOADING (Header & Footer) ---
+    const loadComponent = (selector, url, callback) => {
         const element = document.querySelector(selector);
         if (element) {
             fetch(url)
                 .then(response => response.ok ? response.text() : Promise.reject('Component not found.'))
                 .then(data => {
                     element.innerHTML = data;
-                    // Re-run scripts that depend on the new content, like the hamburger menu
-                    initializeHeaderScripts();
+                    // Run any callback function after the component is loaded
+                    if (callback) {
+                        callback();
+                    }
                 })
                 .catch(error => console.error(`Error loading component ${url}:`, error));
         }
     };
-
-    // --- SCRIPTS TO RUN AFTER HEADER LOADS ---
-    const initializeHeaderScripts = () => {
+    
+    // --- SETUP MOBILE MENU ---
+    const setupMobileMenu = () => {
         const hamburger = document.querySelector('.hamburger-menu');
         const navMenu = document.querySelector('.navbar-menu');
+        const overlay = document.querySelector('.mobile-menu-overlay');
         const body = document.body;
 
-        if (hamburger) {
-            hamburger.addEventListener('click', () => {
-                hamburger.classList.toggle('active');
-                navMenu.classList.toggle('active');
-                body.classList.toggle('mobile-menu-open');
-            });
-        }
+        if (hamburger && navMenu && overlay) {
+            const openMenu = () => {
+                hamburger.classList.add('active');
+                navMenu.classList.add('active');
+                overlay.classList.add('active');
+                body.classList.add('mobile-menu-open');
+            };
+            
+            const closeMenu = () => {
+                hamburger.classList.remove('active');
+                navMenu.classList.remove('active');
+                overlay.classList.remove('active');
+                body.classList.remove('mobile-menu-open');
+            };
 
-        // Active nav link highlighting
-        const navLinks = document.querySelectorAll('.nav-link');
+            hamburger.addEventListener('click', () => {
+                const isOpen = hamburger.classList.contains('active');
+                if (isOpen) {
+                    closeMenu();
+                } else {
+                    openMenu();
+                }
+            });
+
+            overlay.addEventListener('click', closeMenu);
+        }
+    };
+    
+    // --- ACTIVE NAV LINK HIGHLIGHTING ---
+    const setActiveNavLink = () => {
+        const navLinks = document.querySelectorAll('.nav-link'); 
         const currentLocation = window.location.pathname.split("/").pop() || 'index.html';
+        
         navLinks.forEach(link => {
             const linkPath = link.getAttribute('href').split("/").pop();
             if (linkPath === currentLocation) {
@@ -42,8 +67,13 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     };
 
-    // Load header and footer
-    loadComponent('header.main-header', 'header.html');
+    // Load header, and ONLY AFTER it's loaded, setup the menu and active links
+    loadComponent('header.main-header', 'header.html', () => {
+        setupMobileMenu();
+        setActiveNavLink();
+    });
+
+    // Load footer
     loadComponent('footer.main-footer', 'footer.html');
 
 
@@ -74,42 +104,35 @@ document.addEventListener('DOMContentLoaded', function() {
                     const circumference = 2 * Math.PI * radius;
                     const target = +numberEl.getAttribute('data-target');
                     
-                    // This sets the circle to be initially empty
                     progressCircle.style.strokeDasharray = `${circumference} ${circumference}`;
                     progressCircle.style.strokeDashoffset = circumference;
 
                     let startTime = null;
-                    const animationDuration = 2500; // Animation duration in milliseconds
+                    const animationDuration = 2500;
 
                     function animate(currentTime) {
                         if (startTime === null) startTime = currentTime;
                         const elapsedTime = currentTime - startTime;
                         const progress = Math.min(elapsedTime / animationDuration, 1);
                         
-                        // Update number
                         const currentNumber = Math.floor(progress * target);
                         numberEl.innerText = currentNumber.toLocaleString();
                         
-                        // Update circle offset
                         const offset = circumference - progress * circumference;
                         progressCircle.style.strokeDashoffset = offset;
 
                         if (progress < 1) {
                             requestAnimationFrame(animate);
                         } else {
-                            // Ensure final values are exact
                             numberEl.innerText = target.toLocaleString();
                             progressCircle.style.strokeDashoffset = 0;
                         }
                     }
-
                     requestAnimationFrame(animate);
                 });
-
-                observer.unobserve(statsSection); // Animate only once
+                observer.unobserve(statsSection);
             }
         }, { threshold: 0.6 });
-
         statsObserver.observe(statsSection);
     }
     // --- END: ANIMATED NUMBER COUNTERS WITH PROGRESS CIRCLE ---
