@@ -110,7 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     progressCircle.style.strokeDashoffset = circumference;
 
                     let startTime = null;
-                    const animationDuration = 1500;
+                    const animationDuration = 2000;
 
                     function animate(currentTime) {
                         if (startTime === null) startTime = currentTime;
