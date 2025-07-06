@@ -134,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
                 observer.unobserve(statsSection);
             }
-        }, { threshold: 0.6 });
+        }, { threshold: 0.1 });
         statsObserver.observe(statsSection);
     }
     // --- END: ANIMATED NUMBER COUNTERS WITH PROGRESS CIRCLE ---
