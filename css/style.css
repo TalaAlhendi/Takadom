@@ -23,7 +23,7 @@ body {
 }
 
 body.mobile-menu-open {
-    overflow: hidden;
+    overflow: hidden; /* FIX: Prevents scrolling when mobile menu is open */
 }
 
 .mobile-menu-overlay {
@@ -79,7 +79,7 @@ section { padding: 6rem 0; }
 }
 .text-content a{
     color: var(--accent-color);
-}
+            }
 .btn-primary { background-color: var(--accent-color); color: #fff; }
 .btn-primary:hover { background-color: #0A2540; color: #fff; transform: translateY(-2px); }
 .btn-secondary { background-color: transparent; color: #fff; border-color: #fff; }
@@ -159,6 +159,27 @@ section { padding: 6rem 0; }
 .hamburger-menu { display: none; cursor: pointer; background: none; border: none; z-index: 1003; }
 .hamburger-menu .bar { display: block; width: 25px; height: 3px; margin: 5px auto; background-color: var(--primary-color); transition: all 0.3s ease-in-out; }
 
+/* --- Mobile Menu --- */
+.navbar-menu {
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 280px;
+    height: 100vh;
+    background: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+    transform: translateX(100%);
+    transition: transform 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+    z-index: 1002;
+    gap: 2rem;
+}
+
+
 /* --- Mobile Menu (Centered Layout) --- */
 .navbar-menu {
     position: fixed;
@@ -233,10 +254,10 @@ section { padding: 6rem 0; }
     margin-left: auto;
     padding-right: 50px;
     padding-left: 50px;
-    align-items: center;
-   
+    align-items: center; 
 }
-;
+
+
 
 /* --- Hero & Page Headers --- */
 .hero, .page-hero { color: #fff; height: 80vh; display: flex; align-items: center; text-align: center; background-size: cover; background-position: center; position: relative; }
@@ -346,7 +367,7 @@ section { padding: 6rem 0; }
 .inner-text-container p:last-of-type { margin-bottom: 0; }
 
 .cta-section {
-    background-image: url('images/contact.png');
+    background-image: url('../images/contact.png');
     background-size: cover;
     background-position: center;
     position: relative;
@@ -484,7 +505,7 @@ section { padding: 6rem 0; }
 
 @media (max-width: 768px) {
     .navbar-links-desktop,
-    .navbar .nav-donate-btn {
+    .navbar .nav-donate-btn { /* <<< THE FIX IS HERE */
         display: none;
     }
     .hamburger-menu {
